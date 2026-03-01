@@ -2,9 +2,8 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, parse_quote, Data, DataStruct, DeriveInput, Error, Field, Fields, Ident, Index, Member, Path};
+use syn::{parse_macro_input, Data, DataStruct, DeriveInput, Error, Field, Fields, Ident, Index, Member};
 
-const CRATE_NAME: &'static str = "bittern";
 const TRAIT_NAME: &'static str = "Identity";
 const KEY_ATTR: &'static str = "identity";
 
@@ -17,10 +16,6 @@ pub fn derive_identity(input: TokenStream) -> TokenStream {
         _ => Error::new_spanned(&name, format!("#[derive({})] only supports structs", TRAIT_NAME))
             .to_compile_error().into()
     }
-}
-
-fn find_crate() -> Path {
-    parse_quote!(::#CRATE_NAME)
 }
 
 fn check_attr(fields: &Fields) -> Result<Option<usize>, Error> {
@@ -58,32 +53,30 @@ fn derive_struct(target: Ident, struct_data: DataStruct) -> TokenStream {
 }
 
 fn derive_struct_key(target: Ident, key_index: usize, key_field: Field) -> TokenStream {
-    let bittern = find_crate();
-
     let key_ty = key_field.ty;
     let key = member(key_index, key_field.ident);
 
     quote! {
-        impl #bittern::Identity for #target {
-            type Index = <#key_ty as #bittern::Identity>::Index;
+        impl ::bittern::Identity for #target {
+            type Index = <#key_ty as ::bittern::Identity>::Index;
 
-            fn index(key: &Self) -> Self::Index {
-                <#key_ty as #bittern::Identity>::index(&key.#key)
+            fn index(key: &Self) -> &Self::Index {
+                <#key_ty as ::bittern::Identity>::index(&key.#key)
             }
 
             fn equivalent(&self, other: &Self) -> bool {
-                <#key_ty as #bittern::Identity>::equivalent(&self.#key, &other.#key)
+                <#key_ty as ::bittern::Identity>::equivalent(&self.#key, &other.#key)
             }
         }
-        impl #bittern::Identity<#key_ty> for #target {
-            type Index = <#key_ty as #bittern::Identity>::Index;
+        impl ::bittern::Identity<#key_ty> for #target {
+            type Index = <#key_ty as ::bittern::Identity>::Index;
 
-            fn index(key: &#key_ty) -> Self::Index {
-                <#key_ty as #bittern::Identity>::index(key)
+            fn index(key: &#key_ty) -> &Self::Index {
+                <#key_ty as ::bittern::Identity>::index(key)
             }
 
             fn equivalent(&self, other: &#key_ty) -> bool {
-                <#key_ty as #bittern::Identity>::equivalent(&self.#key, other)
+                <#key_ty as ::bittern::Identity>::equivalent(&self.#key, other)
             }
         }
     }.into()
