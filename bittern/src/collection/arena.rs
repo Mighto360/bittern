@@ -1,12 +1,10 @@
+use crate::collection::any_ref::AnyRef;
+use crate::collection::entry::{Entry, EntryOccupied, EntryVacant};
+use crate::collection::reference::Ref;
 use crate::identity::Identity;
 use crate::internal::arena::ArenaInner;
-use crate::rc::item::Item;
-use alloc::rc::{Rc, Weak};
-use core::cell::Ref;
-use core::ptr::NonNull;
 use crate::ArenaConfig;
-use crate::internal::index::HashIndex;
-use crate::rc::entry::{Entry, EntryOccupied, EntryVacant};
+use alloc::rc::{Rc, Weak};
 
 pub(crate) type ArenaWeak<T> = Weak<ArenaInner<T>>;
 
@@ -42,9 +40,9 @@ impl<T: ?Sized> Arena<T> {
     pub(crate) fn as_ptr(&self) -> *const ArenaInner<T> {
         self.rc.as_ref()
     }
-    
-    fn symbol_ref(&self, ptr: NonNull<T>) -> Item<T> {
-        Item::new(ptr, self.clone())
+
+    pub(crate) fn is_inner(&self, other: *const ArenaInner<T>) -> bool {
+        core::ptr::addr_eq(self.as_ptr(), other)
     }
 
     #[inline]
@@ -58,8 +56,8 @@ impl<T: ?Sized> Arena<T> {
     }
 
     #[inline]
-    pub fn owns(&self, key: &Item<T>) -> bool {
-        self.is(key.arena())
+    pub fn owns<K: AnyRef<T>>(&self, key: &K) -> bool {
+        key.owned_by(self)
     }
 
     #[inline]
@@ -86,22 +84,22 @@ impl<T: ?Sized> Arena<T> {
     pub fn for_each(&self, f: impl FnMut(&T)) {
         self.rc.for_each(f)
     }
-
-    pub fn get<K>(&self, key: &K) -> Option<Item<T>>
+    
+    pub fn get<K>(&'_ self, key: &K) -> Option<Ref<'_, T>>
     where K: ?Sized, T: Identity<K>
     {
-        match self.rc.get(key) {
-            Some(ptr) => Some(self.symbol_ref(ptr)),
-            None => None
+        match self.rc.get_ptr(key) {
+            Some(ptr) => Some(Ref::new(ptr, self)),
+            None => None,
         }
     }
 
-    pub fn entry<K>(&self, key: &K) -> Entry<T>
+    pub fn entry<K>(&'_ self, key: &K) -> Entry<'_, T>
     where K: ?Sized, T: Identity<K>
     {
         match self.get(key) {
             Some(item) => Entry::Occupied(EntryOccupied { item }),
-            None => Entry::Vacant(EntryVacant { arena: self.clone() }),
+            None => Entry::Vacant(EntryVacant { arena: self }),
         }
     }
     
@@ -119,35 +117,35 @@ impl<T: ?Sized> Clone for Arena<T> {
 
 // intern
 impl Arena<str> {
-    pub fn intern(&self, val: &str) -> Item<str> {
-        self.symbol_ref(self.rc.intern(val))
+    pub fn intern(&'_ self, val: &str) -> Ref<'_, str>{
+        Ref::new(self.rc.intern(val), self)
     }
 }
 impl<T> Arena<[T]> where T: Copy, [T]: Identity
 {
-    pub fn intern(&self, val: &[T]) -> Item<[T]> {
-        self.symbol_ref(self.rc.intern(val))
+    pub fn intern(&'_ self, val: &[T]) -> Ref<'_, [T]> {
+        Ref::new(self.rc.intern(val), self)
     }
 }
 
 // intern_owned
 impl<T> Arena<T> where T: Identity
 {
-    pub fn intern_owned(&self, val: T) -> Item<T> {
-        self.symbol_ref(self.rc.intern_owned(val))
+    pub fn intern_owned(&'_ self, val: T) -> Ref<'_, T> {
+        Ref::new(self.rc.intern_owned(val), self)
     }
 }
 
 // intern_cloned
 impl<T> Arena<T> where T: Clone + Identity
 {
-    pub fn intern_cloned(&self, val: &T) -> Item<T> {
-        self.symbol_ref(self.rc.intern_cloned(val))
+    pub fn intern_cloned(&'_ self, val: &T) -> Ref<'_, T> {
+        Ref::new(self.rc.intern_cloned(val), self)
     }
 }
 impl<T> Arena<[T]> where T: Clone, [T]: Identity
 {
-    pub fn intern_cloned(&self, val: &[T]) -> Item<[T]> {
-        self.symbol_ref(self.rc.intern_cloned(val))
+    pub fn intern_cloned(&'_ self, val: &[T]) -> Ref<'_, [T]> {
+        Ref::new(self.rc.intern_cloned(val), self)
     }
 }

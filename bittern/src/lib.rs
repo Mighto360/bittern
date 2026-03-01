@@ -2,7 +2,7 @@
 extern crate alloc;
 
 mod identity;
-mod rc;
+mod collection;
 mod internal;
 mod config;
 
@@ -10,16 +10,17 @@ mod config;
 pub use bittern_derive::*;
 
 pub use config::ArenaConfig;
-pub use rc::arena::Arena;
-pub use rc::item::Item;
-pub use rc::rel::Rel;
-pub use rc::entry::Entry;
-pub use rc::secondary::SecondaryMap;
+pub use collection::arena::Arena;
+pub use collection::strong::Strong;
+pub use collection::weak::Weak;
+pub use collection::reference::Ref;
+pub use collection::entry::Entry;
+pub use collection::secondary::SecondaryMap;
 pub use identity::Identity;
 
 #[cfg(test)]
 mod tests {
-    use crate::{Arena, Item};
+    use crate::{Arena, Strong};
 
     #[test]
     fn test_arena_utilities() {
@@ -55,11 +56,11 @@ mod tests {
 
     #[test]
     fn test_rc_safety() {
-        let s1: Item<str>;
+        let s1: Strong<str>;
         {
             let arena: Arena<str> = Arena::new();
             {
-                s1 = arena.intern("hello");
+                s1 = arena.intern("hello").strong();
                 assert_eq!(&*s1, "hello");
             }
             assert_eq!(&*s1, "hello");

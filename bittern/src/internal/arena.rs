@@ -4,8 +4,8 @@ use crate::internal::ptr::{non_null, non_null_drop};
 use crate::ArenaConfig;
 use bumpalo::Bump;
 use core::cell::RefCell;
-use core::ptr::NonNull;
 use core::mem::size_of;
+use core::ptr::NonNull;
 
 pub(crate) struct ArenaInner<T: ?Sized> {
     arena: Bump,
@@ -47,10 +47,10 @@ impl<T: ?Sized> ArenaInner<T> {
         self.index.borrow().contains(key)
     }
 
-    pub(crate) fn get<K>(&self, key: &K) -> Option<NonNull<T>>
+    pub(crate) fn get_ptr<K>(&self, key: &K) -> Option<NonNull<T>>
     where K: ?Sized, T: Identity<K>
     {
-        self.index.borrow().get(key)
+        self.index.borrow().get_ptr(key)
     }
 }
 impl<T: ?Sized> Drop for ArenaInner<T> {
@@ -65,7 +65,7 @@ impl<T: ?Sized> Drop for ArenaInner<T> {
 // intern_owned
 impl<T: Identity> ArenaInner<T> where Self: AllocOwned<T> {
     pub(crate) fn intern_owned(&self, val: T) -> NonNull<T> {
-        match self.get(&val) {
+        match self.get_ptr(&val) {
             Some(existing_ptr) => existing_ptr,
             None => {
                 let new: &mut T = self.alloc(val);
@@ -78,7 +78,7 @@ impl<T: Identity> ArenaInner<T> where Self: AllocOwned<T> {
 // intern
 impl<T: ?Sized + Identity> ArenaInner<T> where Self: AllocCopy<T> {
     pub(crate) fn intern(&self, val: &T) -> NonNull<T> {
-        match self.get(val) {
+        match self.get_ptr(val) {
             Some(existing_ptr) => existing_ptr,
             None => {
                 let new: &mut T = self.alloc(val);
@@ -91,7 +91,7 @@ impl<T: ?Sized + Identity> ArenaInner<T> where Self: AllocCopy<T> {
 // intern_cloned
 impl<T: ?Sized + Identity> ArenaInner<T> where Self: AllocClone<T> {
     pub(crate) fn intern_cloned(&self, val: &T) -> NonNull<T> {
-        match self.get(val) {
+        match self.get_ptr(val) {
             Some(existing_ptr) => existing_ptr,
             None => {
                 let new: &mut T = self.alloc_cloned(val);

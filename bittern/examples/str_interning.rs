@@ -1,6 +1,6 @@
 // Demonstrates how to intern strings, without managing lifetimes or extra indirection from String
 
-use bittern::{Arena, Item};
+use bittern::{Arena, Ref};
 
 fn main() {
     // Create an arena
@@ -8,14 +8,14 @@ fn main() {
 
     // Allocate a new str in the arena.
     // The lifetime of the slice doesn't matter, since it is copied into heap memory
-    let s1: Item<str> = arena.intern("hello world");
+    let s1: Ref<str> = arena.intern("hello world");
 
     // This str is already interned so it will return the same item
-    let s2: Item<str> = arena.intern("hello world");
+    let s2: Ref<str> = arena.intern("hello world");
     assert!(s2.is(&s1));
 
     // This str is new, it will return a different item
-    let s3: Item<str> = arena.intern("👋🌎");
+    let s3: Ref<str> = arena.intern("👋🌎");
     assert!(s3.is_not(&s1));
 
     // Comparing items by identity is much faster than a string equality comparison

@@ -1,35 +1,35 @@
-use crate::{Arena, Identity, Item};
+use crate::{Arena, Identity, Ref};
 
-pub struct EntryOccupied<V: ?Sized> {
-    pub(crate) item: Item<V>,
+pub struct EntryOccupied<'a, V: ?Sized> {
+    pub(crate) item: Ref<'a, V>,
 }
 
-pub struct EntryVacant<V: ?Sized> {
-    pub(crate) arena: Arena<V>
+pub struct EntryVacant<'a, V: ?Sized> {
+    pub(crate) arena: &'a Arena<V>
 }
 
 /// Utility for handling an identity entry which may or may not exist
-pub enum Entry<V: ?Sized> {
-    Occupied(EntryOccupied<V>),
-    Vacant(EntryVacant<V>),
+pub enum Entry<'a, V: ?Sized> {
+    Occupied(EntryOccupied<'a, V>),
+    Vacant(EntryVacant<'a, V>),
 }
-impl<V: ?Sized> Entry<V> {
-    pub fn item(self) -> Option<Item<V>> {
+impl<'a, V: ?Sized> Entry<'a, V> {
+    pub fn get(self) -> Option<Ref<'a, V>> {
         match self {
             Self::Occupied(entry) => Some(entry.item),
             Self::Vacant(_) => None,
         }
     }
 }
-impl<V: Identity> Entry<V> {
-    pub fn or_insert(self, default: V) -> Item<V> {
+impl<'a, V: Identity> Entry<'a, V> {
+    pub fn or_insert(self, default: V) -> Ref<'a, V> {
         match self {
             Self::Occupied(entry) => entry.item,
             Self::Vacant(entry) => entry.arena.intern_owned(default),
         }
     }
 
-    pub fn or_insert_with<F>(self, default: F) -> Item<V>
+    pub fn or_insert_with<F>(self, default: F) -> Ref<'a, V>
     where F: FnOnce() -> V
     {
         match self {
@@ -38,8 +38,8 @@ impl<V: Identity> Entry<V> {
         }
     }
 }
-impl<V: Identity + Default> Entry<V> {
-    pub fn or_default(self) -> Item<V> {
+impl<'a, V: Identity + Default> Entry<'a, V> {
+    pub fn or_default(self) -> Ref<'a, V> {
         self.or_insert_with(Default::default)
     }
 }

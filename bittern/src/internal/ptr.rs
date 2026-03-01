@@ -7,10 +7,18 @@ pub(crate) fn non_null<T: ?Sized>(r: &T) -> NonNull<T> {
     unsafe { NonNull::new_unchecked(r as *const T as *mut T) }
 }
 
-/// Dereferences a NonNull pointer
+/// Dereferences a referenced NonNull pointer
 /// # Safety
 /// Caller must guarantee that the pointer will be a safe reference
 pub(crate) fn non_null_deref<T: ?Sized>(ptr: &NonNull<T>) -> &T {
+    unsafe { ptr.as_ref() }
+}
+
+
+/// Dereferences an owned NonNull pointer
+/// # Safety
+/// Caller must guarantee that the pointer will be a safe reference, and the lifetime is correct
+pub(crate) fn non_null_deref_copy<'a, T: ?Sized>(ptr: NonNull<T>) -> &'a T {
     unsafe { ptr.as_ref() }
 }
 

@@ -28,7 +28,7 @@ bittern can store values together in a chunk of allocated memory.
 ```rust
 // Demonstrates how to intern strings, without wrangling lifetimes or individual String allocations
 
-use bittern::{Arena, Item};
+use bittern::{Arena, Ref};
 
 fn main() {
     // Create an arena
@@ -36,14 +36,14 @@ fn main() {
 
     // Allocate a new str in the arena.
     // The lifetime of the slice doesn't matter, since it is copied into heap memory
-    let s1: Item<str> = arena.intern("hello world");
+    let s1: Ref<str> = arena.intern("hello world");
 
     // This str is already interned so it will return the same item
-    let s2: Item<str> = arena.intern("hello world");
+    let s2: Ref<str> = arena.intern("hello world");
     assert!(s2.is(&s1));
 
     // This str is new, it will return a different item
-    let s3: Item<str> = arena.intern("👋🌎");
+    let s3: Ref<str> = arena.intern("👋🌎");
     assert!(s3.is_not(&s1));
 
     // Comparing items by identity is much faster than a string equality comparison
@@ -62,7 +62,7 @@ The following example demonstrates a math interpreter that merges equivalent sub
 // Demonstrates a simple expression interpreter using an arena-allocated syntax tree.
 // The language uses Lisp-like prefix notation with optional parentheses
 
-use bittern::{Arena, Item, Rel, SecondaryMap};
+use bittern::{Arena, Strong, Weak, SecondaryMap};
 use core::hash::Hash;
 
 fn main() {
@@ -76,10 +76,10 @@ fn main() {
     "#;
     
     let mut parser = Parser::new();
-    let expr = parser.parse(input);
+    let expr = parser.parse(input).strong();
     assert_eq!(parser.expr_table.len(), 14);
     
-    let result = Eval::new().eval(expr);
+    let result = Eval::new(&parser).eval(expr);
     assert_eq!(result, Some(6708));
 }
 
@@ -87,21 +87,21 @@ type Int = i64;
 type Name = str;
 
 // An expression tree or subtree.
-// Item<Name> is a strong ref, so the Name arena will live until the Expr is dropped.
-// Rel<Expr> is a weak ref, so expressions may reference others within the same arena.
+// Strong<Name> is a strong ref, so the Name arena will live until the Expr is dropped.
+// Weak<Expr> is a weak ref, so expressions may reference others within the same arena.
 #[derive(Hash, PartialEq, Eq, Debug)]
 enum Expr {
     Empty,
     Int(Int),
-    Name(Item<Name>),
-    Block(Vec<Rel<Expr>>),
-    Let(Rel<Expr>, Rel<Expr>),
-    Add(Rel<Expr>, Rel<Expr>),
-    Sub(Rel<Expr>, Rel<Expr>),
-    Mul(Rel<Expr>, Rel<Expr>),
-    Div(Rel<Expr>, Rel<Expr>),
-    Pow(Rel<Expr>, Rel<Expr>),
-    Sqrt(Rel<Expr>),
+    Name(Strong<Name>),
+    Block(Vec<Weak<Expr>>),
+    Let(Weak<Expr>, Weak<Expr>),
+    Add(Weak<Expr>, Weak<Expr>),
+    Sub(Weak<Expr>, Weak<Expr>),
+    Mul(Weak<Expr>, Weak<Expr>),
+    Div(Weak<Expr>, Weak<Expr>),
+    Pow(Weak<Expr>, Weak<Expr>),
+    Sqrt(Weak<Expr>),
 }
 
 // Parses input into an AST.
@@ -116,7 +116,7 @@ impl<'src> Parser<'src> {
 }
 
 // Evaluates the AST.
-// SecondaryMap associates an Item<Name> with a value
+// SecondaryMap associates a Strong<Name> with a value
 struct Eval {
     var_table: SecondaryMap<Name, Option<Int>>,
 }

@@ -7,6 +7,7 @@ use syn::{parse_macro_input, parse_quote, Data, DataStruct, DeriveInput, Error, 
 const CRATE_NAME: &'static str = "bittern";
 const TRAIT_NAME: &'static str = "Identity";
 const KEY_ATTR: &'static str = "identity";
+
 #[proc_macro_derive(Identity, attributes(identity))]
 pub fn derive_identity(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);

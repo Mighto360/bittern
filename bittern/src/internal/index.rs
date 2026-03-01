@@ -36,7 +36,7 @@ impl<T: ?Sized, S: BuildHasher> HashIndex<T, S> {
     }
 }
 impl<T: ?Sized, S: BuildHasher> HashIndex<T, S> {
-    pub(crate) fn get<K>(&self, key: &K) -> Option<NonNull<T>>
+    pub(crate) fn get_ptr<K>(&self, key: &K) -> Option<NonNull<T>>
     where K: ?Sized, T: Identity<K>
     {
         let hash = T::hash(key, &self.state);
@@ -47,7 +47,7 @@ impl<T: ?Sized, S: BuildHasher> HashIndex<T, S> {
     pub(crate) fn contains<K>(&self, key: &K) -> bool
     where K: ?Sized, T: Identity<K>
     {
-        self.get(key).is_some()
+        self.get_ptr(key).is_some()
     }
 }
 impl<T: ?Sized + Identity, S: BuildHasher> HashIndex<T, S> {
