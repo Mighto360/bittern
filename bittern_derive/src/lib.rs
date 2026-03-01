@@ -1,7 +1,6 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use proc_macro_crate::{crate_name, FoundCrate};
 use quote::quote;
 use syn::{parse_macro_input, parse_quote, Data, DataStruct, DeriveInput, Error, Field, Fields, Ident, Index, Member, Path};
 
@@ -20,11 +19,7 @@ pub fn derive_identity(input: TokenStream) -> TokenStream {
 }
 
 fn find_crate() -> Path {
-    match crate_name(CRATE_NAME) {
-        Ok(FoundCrate::Itself) => parse_quote!(crate),
-        Ok(FoundCrate::Name(crate_name)) => parse_quote!(::#crate_name),
-        Err(_) => parse_quote!(::#CRATE_NAME),
-    }
+    parse_quote!(::#CRATE_NAME)
 }
 
 fn check_attr(fields: &Fields) -> Result<Option<usize>, Error> {
@@ -69,7 +64,9 @@ fn derive_struct_key(target: Ident, key_index: usize, key_field: Field) -> Token
 
     quote! {
         impl #bittern::Identity for #target {
-            fn index(key: &Self) -> impl ::core::hash::Hash {
+            type Index = <#key_ty as #bittern::Identity>::Index;
+
+            fn index(key: &Self) -> Self::Index {
                 <#key_ty as #bittern::Identity>::index(&key.#key)
             }
 
@@ -78,7 +75,9 @@ fn derive_struct_key(target: Ident, key_index: usize, key_field: Field) -> Token
             }
         }
         impl #bittern::Identity<#key_ty> for #target {
-            fn index(key: &#key_ty) -> impl ::core::hash::Hash {
+            type Index = <#key_ty as #bittern::Identity>::Index;
+
+            fn index(key: &#key_ty) -> Self::Index {
                 <#key_ty as #bittern::Identity>::index(key)
             }
 

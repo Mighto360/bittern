@@ -76,6 +76,6 @@ impl<T: ?Sized> PartialEq for Rel<T> {
 impl<T: ?Sized> Eq for Rel<T> {}
 impl<T: ?Sized + Debug> Debug for Rel<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        write!(f, "Rel({:x})", self.as_ptr().addr())
+        write!(f, "Rel({})", core::any::type_name::<T>())
     }
 }

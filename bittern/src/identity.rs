@@ -5,12 +5,14 @@ use crate::internal::hash::core_hash;
 /// If more than one Identity impl exists for a type,
 /// they must all produce the same hash for equivalent values.
 pub trait Identity<K: ?Sized = Self> {
+    type Index: ?Sized + Hash;
+
     /// Tests if values represent the same entity
     fn equivalent(&self, other: &K) -> bool;
     
     /// Provides a hashable value for each key.
     /// Values should be equivalent if and only if they have the same index
-    fn index(key: &K) -> impl Hash;
+    fn index(key: &K) -> &Self::Index;
     
     /// Hashes a key for indexing
     fn hash<S: BuildHasher>(key: &K, state: &S) -> u64 {
@@ -19,11 +21,13 @@ pub trait Identity<K: ?Sized = Self> {
 }
 
 impl<T> Identity for T where T: ?Sized + Hash + Eq {
+    type Index = Self;
+
     fn equivalent(&self, other: &Self) -> bool {
         self == other
     }
 
-    fn index(key: &Self) -> impl Hash {
+    fn index(key: &Self) -> &Self {
         key
     }
 }

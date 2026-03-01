@@ -74,6 +74,7 @@ fn main() {
     let c sqrt (+ (pow a 2) (pow b 2))
     (c)
     "#;
+    
     let mut parser = Parser::new();
     let expr = parser.parse(input);
     assert_eq!(parser.expr_table.len(), 14);

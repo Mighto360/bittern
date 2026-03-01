@@ -3,8 +3,9 @@ use crate::internal::index::HashIndex;
 use crate::internal::ptr::{non_null, non_null_drop};
 use crate::ArenaConfig;
 use bumpalo::Bump;
-use core::cell::{Ref, RefCell};
+use core::cell::RefCell;
 use core::ptr::NonNull;
+use core::mem::size_of;
 
 pub(crate) struct ArenaInner<T: ?Sized> {
     arena: Bump,
@@ -23,7 +24,7 @@ impl<T: ?Sized> ArenaInner<T> {
     pub(crate) fn config(&self) -> &ArenaConfig {
         &self.config
     }
-    
+
     pub(crate) fn for_each(&self, f: impl FnMut(&T)) {
         let index = self.index.borrow();
         index.iter_ref().for_each(f)
