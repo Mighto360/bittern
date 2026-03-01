@@ -1,0 +1,125 @@
+# bittern
+
+A reference-counted arena for interning and deduplicating data.
+
+Bittern provides `Arena<T>`, a collection type with roughly three duties:
+
+- Bump allocation: a blazing fast arena for any type, including dynamically sized slices.
+- Indexing: items can be accessed and interned by their hash or unique key.
+- Reference counting: the arena will live as long as any references to it or its data.
+
+Bump allocators are appropriate for use cases where items will be allocated gradually, but dropped as a group.   
+That makes bittern ideal for building large graphs, symbol tables, and other deduplicated collections.
+
+## Compatibility
+
+This crate fully supports `#![no_std]` environments. It depends only on `core` and `alloc`.
+
+## Examples
+
+### 1) String interning / Symbol table
+
+When interning dynamically sized slices or strings,
+bittern can store values together in a chunk of allocated memory.
+- Fewer allocations and better locality compared to many individual `String` or `Vec`.
+- Slices are interned into a pointer, which greatly improves the performance of equality checks.
+
+[examples/str_interning.rs](bittern/examples/str_interning.rs)
+```rust
+// Demonstrates how to intern strings, without wrangling lifetimes or individual String allocations
+
+use bittern::{Arena, Item};
+
+fn main() {
+    // Create an arena
+    let arena: Arena<str> = Arena::new();
+
+    // Allocate a new str in the arena.
+    // The lifetime of the slice doesn't matter, since it is copied into heap memory
+    let s1: Item<str> = arena.intern("hello world");
+
+    // This str is already interned so it will return the same item
+    let s2: Item<str> = arena.intern("hello world");
+    assert!(s2.is(&s1));
+
+    // This str is new, it will return a different item
+    let s3: Item<str> = arena.intern("👋🌎");
+    assert!(s3.is_not(&s1));
+
+    // Comparing items by identity is much faster than a string equality comparison
+    assert!(s1.is(&s2));    // ~0.3 ns
+    assert_eq!(&*s1, &*s2); // ~4.0 ns (more than 10x slower, even for short strings!)
+}
+```
+
+### 2) Abstract syntax tree
+
+This crate is well suited for building graphs and trees with many identical nodes.  
+The following example demonstrates a math interpreter that merges equivalent subexpressions.
+
+[examples/parsing.rs](bittern/examples/parsing.rs)
+```rust
+// Demonstrates a simple expression interpreter using an arena-allocated syntax tree.
+// The language uses Lisp-like prefix notation with optional parentheses
+
+use bittern::{Arena, Item, Rel, SecondaryMap};
+use core::hash::Hash;
+
+fn main() {
+    // Evaluate the Pythagorean theorem (sqrt(3000^2 + 6000^2) = 6708)
+    let input = r#"
+    do
+    let a 3000
+    let b 6000
+    let c sqrt (+ (pow a 2) (pow b 2))
+    (c)
+    "#;
+    let mut parser = Parser::new();
+    let expr = parser.parse(input);
+    assert_eq!(parser.expr_table.len(), 14);
+    
+    let result = Eval::new().eval(expr);
+    assert_eq!(result, Some(6708));
+}
+
+type Int = i64;
+type Name = str;
+
+// An expression tree or subtree.
+// Item<Name> is a strong ref, so the Name arena will live until the Expr is dropped.
+// Rel<Expr> is a weak ref, so expressions may reference others within the same arena.
+#[derive(Hash, PartialEq, Eq, Debug)]
+enum Expr {
+    Empty,
+    Int(Int),
+    Name(Item<Name>),
+    Block(Vec<Rel<Expr>>),
+    Let(Rel<Expr>, Rel<Expr>),
+    Add(Rel<Expr>, Rel<Expr>),
+    Sub(Rel<Expr>, Rel<Expr>),
+    Mul(Rel<Expr>, Rel<Expr>),
+    Div(Rel<Expr>, Rel<Expr>),
+    Pow(Rel<Expr>, Rel<Expr>),
+    Sqrt(Rel<Expr>),
+}
+
+// Parses input into an AST.
+// Identical expressions will be interned into a single node.
+struct Parser<'src> {
+    input: &'src str,
+    name_table: Arena<Name>,
+    expr_table: Arena<Expr>,
+}
+impl<'src> Parser<'src> {
+    // ... full impl in examples/parsing.rs
+}
+
+// Evaluates the AST.
+// SecondaryMap associates an Item<Name> with a value
+struct Eval {
+    var_table: SecondaryMap<Name, Option<Int>>,
+}
+impl Eval {
+    // ... full impl in examples/parsing.rs
+}
+```

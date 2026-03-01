@@ -1,0 +1,2 @@
+[workspace]
+members = ["bittern", "bittern_derive"]
