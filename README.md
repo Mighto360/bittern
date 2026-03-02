@@ -60,9 +60,10 @@ The following example demonstrates a math interpreter that merges equivalent sub
 [examples/parsing.rs](bittern/examples/parsing.rs)
 ```rust
 // Demonstrates a simple expression interpreter using an arena-allocated syntax tree.
-// The language uses Lisp-like prefix notation with optional parentheses
+// The language uses Lisp-like prefix notation with optional parentheses.
+// Feature "derive" must be enabled
 
-use bittern::{Arena, Strong, Weak, SecondaryMap};
+use bittern::{Arena, Strong, Weak, SecondaryMap, Identity};
 use core::hash::Hash;
 
 fn main() {
@@ -89,7 +90,7 @@ type Name = str;
 // An expression tree or subtree.
 // Strong<Name> is a strong ref, so the Name arena will live until the Expr is dropped.
 // Weak<Expr> is a weak ref, so expressions may reference others within the same arena.
-#[derive(Hash, PartialEq, Eq, Debug)]
+#[derive(Identity, Hash, PartialEq, Eq, Debug)]
 enum Expr {
     Empty,
     Int(Int),

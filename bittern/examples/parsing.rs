@@ -1,5 +1,6 @@
 // Demonstrates a simple expression interpreter using an arena-allocated syntax tree.
-// The language uses Lisp-like prefix notation with optional parentheses
+// The language uses Lisp-like prefix notation with optional parentheses.
+// Feature "derive" must be enabled
 
 use bittern::{Arena, Strong, Weak, SecondaryMap, Ref, Identity};
 use core::hash::Hash;
