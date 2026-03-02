@@ -129,31 +129,34 @@ impl Eval {
 ### 3) Primary keys
 
 Sometimes data should be deduplicated by a single field, rather than the entire struct.  
-This example demonstrates a `User` struct identified by an `id` field, using the derive feature.
+This demonstrates a `User` struct identified by its `id` field.
 
 [examples/primary_key.rs](bittern/examples/primary_key.rs)
 ```rust
-// Demonstrates an arena of Users, deduplicated by their `id` field
+// Demonstrates an arena of Users, deduplicated by their id field.
+// Feature "derive" must be enabled
 
+use core::cell::RefCell;
 use bittern::{Identity, Arena, Strong, Ref};
 
 fn main() {
     let users = Users::new();
 
-    let u1 = users.intern_by_id(0, "John Doe");
-    let u2 = users.intern_by_id(1, "Jane Doe");
+    let u1: Ref<User> = users.insert_or_update(0, "John Doe");
+    let u2: Ref<User> = users.insert_or_update(1, "Jane Doe");
     assert!(u1.is_not(&u2));
 
-    let u3 = users.intern_by_id(0, "JOHN");
+    let u3: Ref<User> = users.insert_or_update(0, "JOHN");
     assert!(u1.is(&u3));
-    assert_eq!(&*u3.name, "John Doe"); // This is the previously interned value, so the name didn't change
+    let name = u3.name.borrow();
+    assert_eq!(&**name, "JOHN"); // This is the previously interned User, but the name was updated
 }
 
 #[derive(Identity)]
 struct User {
     #[identity]
     id: u64,
-    name: Strong<str>,
+    name: RefCell<Strong<str>>,
 }
 
 struct Users {
@@ -168,13 +171,16 @@ impl Users {
         }
     }
 
-    fn intern_by_id(&'_ self, id: u64, name: &str) -> Ref<'_, User> {
-        // Use `entry` instead of `intern`, so we can skip allocating the new name if it won't be used
+    fn insert_or_update(&'_ self, id: u64, name: &str) -> Ref<'_, User> {
         self.users
             .entry::<u64>(&id)
+            .and_modify(|user| {
+                let name = self.names.intern(name).strong();
+                user.name.replace(name);
+            })
             .or_insert_with(|| {
                 let name = self.names.intern(name).strong();
-                User { id, name }
+                User { id, name: RefCell::new(name) }
             })
     }
 }

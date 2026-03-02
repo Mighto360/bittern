@@ -20,6 +20,15 @@ impl<'a, V: ?Sized> Entry<'a, V> {
             Self::Vacant(_) => None,
         }
     }
+
+    pub fn and_modify<F>(self, f: F) -> Self
+    where F: FnOnce(&V)
+    {
+        if let Self::Occupied(entry) = &self {
+            f(&*entry.item);
+        }
+        self
+    }
 }
 impl<'a, V: Identity> Entry<'a, V> {
     pub fn or_insert(self, default: V) -> Ref<'a, V> {
