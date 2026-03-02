@@ -20,14 +20,40 @@ pub trait Identity<K: ?Sized = Self> {
     }
 }
 
-impl<T> Identity for T where T: ?Sized + Hash + Eq {
-    type Index = Self;
+macro_rules! impl_identity {
+    (<($($generic:tt)*)> $T:tt) => {
+        impl<$($generic)*> Identity for $T where $T: Hash + Eq {
+            type Index = Self;
 
-    fn equivalent(&self, other: &Self) -> bool {
-        self == other
-    }
+            fn equivalent(&self, other: &Self) -> bool {
+                self == other
+            }
 
-    fn index(key: &Self) -> &Self {
-        key
-    }
+            fn index(key: &Self) -> &Self {
+                key
+            }
+        }
+    };
+    ($($T:ty)+) => {
+        $(
+        impl Identity for $T {
+            type Index = Self;
+
+            fn equivalent(&self, other: &Self) -> bool {
+                self == other
+            }
+
+            fn index(key: &Self) -> &Self {
+                key
+            }
+        }
+        )+
+    };
 }
+impl_identity!(<(T)> [T]);
+impl_identity!(<(T, const N: usize)> [T; N]);
+impl_identity!(
+    str char bool
+    u8 u16 u32 u64 u128 usize
+    i8 i16 i32 i64 i128 isize
+);

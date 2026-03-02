@@ -13,7 +13,8 @@ pub fn derive_identity(input: TokenStream) -> TokenStream {
     let name = input.ident;
     match input.data {
         Data::Struct(struct_data) => derive_struct(name, struct_data),
-        _ => Error::new_spanned(&name, format!("#[derive({})] only supports structs", TRAIT_NAME))
+        Data::Enum(_) => derive_enum(name),
+        _ => Error::new_spanned(&name, format!("#[derive({})] only supports struct and enum", TRAIT_NAME))
             .to_compile_error().into()
     }
 }
@@ -39,17 +40,40 @@ fn member(index: usize, ident: Option<Ident>) -> Member {
     }
 }
 
+fn derive_enum(target: Ident) -> TokenStream {
+    derive_hash_eq(target)
+}
+
 fn derive_struct(target: Ident, struct_data: DataStruct) -> TokenStream {
     let fields = struct_data.fields;
     match check_attr(&fields) {
         Err(err) => err.to_compile_error().into(),
-        Ok(None) => Error::new_spanned(&target, format!("Missing #[{}] attribute", KEY_ATTR))
-            .to_compile_error().into(),
+        Ok(None) => {
+            // Try to implement based on other traits
+            derive_hash_eq(target)
+        },
         Ok(Some(i)) => {
+            // Specified identity field
             let key_field = fields.into_iter().nth(i).expect("index out of bounds");
             derive_struct_key(target, i, key_field)
         },
     }
+}
+
+fn derive_hash_eq(target: Ident) -> TokenStream {
+    quote! {
+        impl ::bittern::Identity for #target where Self: ::core::hash::Hash + Eq {
+            type Index = Self;
+
+            fn equivalent(&self, other: &Self) -> bool {
+                self == other
+            }
+
+            fn index(key: &Self) -> &Self {
+                key
+            }
+        }
+    }.into()
 }
 
 fn derive_struct_key(target: Ident, key_index: usize, key_field: Field) -> TokenStream {

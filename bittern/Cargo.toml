@@ -28,6 +28,7 @@ name = "str_interning"
 
 [[example]]
 name = "parsing"
+required-features = ["derive"]
 
 [[example]]
 name = "primary_key"

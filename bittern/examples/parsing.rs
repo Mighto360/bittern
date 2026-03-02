@@ -1,7 +1,7 @@
 // Demonstrates a simple expression interpreter using an arena-allocated syntax tree.
 // The language uses Lisp-like prefix notation with optional parentheses
 
-use bittern::{Arena, Strong, Weak, SecondaryMap, Ref};
+use bittern::{Arena, Strong, Weak, SecondaryMap, Ref, Identity};
 use core::hash::Hash;
 use core::ops::{Add, Sub, Mul, Div};
 use std::cell::Cell;
@@ -28,7 +28,7 @@ type Int = i64;
 type Name = str;
 
 // A single token produced by the lexer
-#[derive(Hash, PartialEq, Eq, Debug)]
+#[derive(Identity, Hash, PartialEq, Eq, Debug)]
 enum Token {
     ParenOpen,
     ParenClose,
@@ -47,7 +47,7 @@ enum Token {
 // An expression tree or subtree.
 // Strong<Name> is a strong ref, so the Name arena will live until the Expr is dropped.
 // Weak<Expr> is a weak ref, so expressions may reference others within the same arena.
-#[derive(Hash, PartialEq, Eq, Debug)]
+#[derive(Identity, Hash, PartialEq, Eq, Debug)]
 enum Expr {
     Empty,
     Int(Int),
