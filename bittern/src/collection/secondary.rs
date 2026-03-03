@@ -2,7 +2,7 @@ use crate::collection::any_ref::AnyRef;
 use crate::internal::hash::DefaultState;
 use crate::Arena;
 use core::hash::BuildHasher;
-use hashbrown::HashMap;
+use hashbrown::{HashMap, HashSet};
 
 /// A secondary map that associates arena-allocated items with another value.
 /// Items must be from the same arena.
@@ -43,5 +43,41 @@ impl<T: ?Sized, V, S: BuildHasher> SecondaryMap<T, V, S> {
     #[inline]
     pub fn clear(&mut self) {
         self.map.clear();
+    }
+}
+
+/// A secondary set that references a subset of the arena
+pub struct SecondarySet<T: ?Sized, S: BuildHasher = DefaultState> {
+    set: HashSet<*const T, S>,
+    rc: Arena<T>,
+}
+impl<T: ?Sized> SecondarySet<T, DefaultState> {
+    pub fn new(rc: Arena<T>) -> Self {
+        Self {
+            set: HashSet::with_hasher(DefaultState::new()),
+            rc
+        }
+    }
+}
+impl<T: ?Sized, S: BuildHasher> SecondarySet<T, S> {
+    #[inline]
+    pub fn contains<K: AnyRef<T>>(&self, key: &K) -> bool {
+        self.set.contains(&key.as_ptr())
+    }
+
+    #[inline]
+    pub fn insert<K: AnyRef<T>>(&mut self, key: K) -> bool {
+        assert!(key.owned_by(&self.rc), "Arena does not own this key");
+        self.set.insert(key.as_ptr())
+    }
+
+    #[inline]
+    pub fn remove<K: AnyRef<T>>(&mut self, key: &K) -> bool {
+        self.set.remove(&key.as_ptr())
+    }
+
+    #[inline]
+    pub fn clear(&mut self) {
+        self.set.clear();
     }
 }

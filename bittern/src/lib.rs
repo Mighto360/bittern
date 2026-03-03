@@ -15,7 +15,7 @@ pub use collection::strong::Strong;
 pub use collection::weak::Weak;
 pub use collection::reference::Ref;
 pub use collection::entry::Entry;
-pub use collection::secondary::SecondaryMap;
+pub use collection::secondary::{SecondaryMap, SecondarySet};
 pub use identity::Identity;
 
 #[cfg(test)]
