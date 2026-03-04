@@ -6,6 +6,7 @@ use bumpalo::Bump;
 use core::cell::RefCell;
 use core::mem::size_of;
 use core::ptr::NonNull;
+use crate::internal::iter::IndexRefIter;
 
 pub(crate) struct ArenaInner<T: ?Sized> {
     arena: Bump,
@@ -25,9 +26,8 @@ impl<T: ?Sized> ArenaInner<T> {
         &self.config
     }
 
-    pub(crate) fn for_each(&self, f: impl FnMut(&T)) {
-        let index = self.index.borrow();
-        index.iter_ref().for_each(f)
+    pub(crate) fn iter(&'_ self) -> IndexRefIter<'_, T> {
+        IndexRefIter::new(self.index.borrow())
     }
 
     pub(crate) fn allocation_size(&self) -> usize {

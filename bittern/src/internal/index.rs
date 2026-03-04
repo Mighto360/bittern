@@ -4,6 +4,7 @@ use crate::internal::ptr::{non_null, non_null_deref};
 use core::hash::BuildHasher;
 use core::ptr::NonNull;
 use hashbrown::HashTable;
+use crate::internal::iter::IndexIter;
 
 /// Hash table that doesn't store values (only their pointer)
 pub(crate) struct HashIndex<T: ?Sized, S: BuildHasher = DefaultState> {
@@ -27,12 +28,8 @@ impl<T: ?Sized, S: BuildHasher> HashIndex<T, S> {
         self.table.allocation_size()
     }
 
-    pub(crate) fn iter(&self) -> impl Iterator<Item = &NonNull<T>> {
-        self.table.iter()
-    }
-
-    pub fn iter_ref(&self) -> impl Iterator<Item = &T> {
-        self.table.iter().map(non_null_deref)
+    pub(crate) fn iter(&'_ self) -> IndexIter<'_, T> {
+        IndexIter::new(self.table.iter())
     }
 }
 impl<T: ?Sized, S: BuildHasher> HashIndex<T, S> {
