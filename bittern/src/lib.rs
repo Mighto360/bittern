@@ -10,7 +10,6 @@ mod config;
 pub use bittern_derive::*;
 
 pub use collection::arena::Arena;
-pub use collection::entry::Entry;
 pub use collection::reference::Ref;
 pub use collection::secondary::{SecondaryMap, SecondarySet};
 pub use collection::strong::Strong;

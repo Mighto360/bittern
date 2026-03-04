@@ -1,5 +1,4 @@
 use crate::collection::any_ref::AnyRef;
-use crate::collection::entry::{Entry, EntryOccupied, EntryVacant};
 use crate::collection::reference::Ref;
 use crate::identity::Identity;
 use crate::internal::arena::ArenaInner;
@@ -91,15 +90,6 @@ impl<T: ?Sized> Arena<T> {
         match self.rc.get_ptr(key) {
             Some(ptr) => Some(Ref::new(ptr, self)),
             None => None,
-        }
-    }
-
-    pub fn entry<K>(&'_ self, key: &K) -> Entry<'_, T>
-    where K: ?Sized, T: Identity<K>
-    {
-        match self.get(key) {
-            Some(item) => Entry::Occupied(EntryOccupied { item }),
-            None => Entry::Vacant(EntryVacant { arena: self }),
         }
     }
     

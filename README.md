@@ -173,16 +173,17 @@ impl Users {
     }
 
     fn insert_or_update(&'_ self, id: u64, name: &str) -> Ref<'_, User> {
-        self.users
-            .entry::<u64>(&id)
-            .and_modify(|user| {
+        match self.users.get::<u64>(&id) {
+            Some(user) => {
                 let name = self.names.intern(name).strong();
                 user.name.replace(name);
-            })
-            .or_insert_with(|| {
+                user
+            },
+            None => {
                 let name = self.names.intern(name).strong();
-                User { id, name: RefCell::new(name) }
-            })
+                self.users.intern_owned(User { id, name: RefCell::new(name) })
+            }
+        }
     }
 }
 ```
