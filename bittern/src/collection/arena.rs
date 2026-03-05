@@ -44,7 +44,7 @@ impl<T: ?Sized> Arena<T> {
     }
 
     pub(crate) fn is_inner(&self, other: *const ArenaInner<T>) -> bool {
-        core::ptr::addr_eq(self.as_ptr(), other)
+        core::ptr::eq(self.as_ptr(), other)
     }
 
     /// Returns `true` if two references point to the same arena.
@@ -139,7 +139,7 @@ impl Arena<str> {
     /// Interns a value in the arena by copying it to the heap.
     ///
     /// If an identical value is found in the arena (see [`Identity`]), the existing value is returned.
-    /// 
+    ///
     pub fn intern(&'_ self, val: &str) -> Ref<'_, str>{
         Ref::new(self.rc.intern(val), self)
     }
