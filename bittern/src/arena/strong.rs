@@ -6,7 +6,7 @@ use crate::{AnyRef, Arena, Ref, Weak};
 use crate::any_ref::inherent_ref_methods;
 use crate::internal::ptr::non_null_deref;
 
-/// Reference-counted pointer to a single item in an arena
+/// Reference-counted pointer to a single item in an arena.
 pub struct Strong<T: ?Sized> {
     ptr: NonNull<T>,
     rc: Arena<T>,
@@ -16,17 +16,17 @@ impl<T: ?Sized> Strong<T> {
         Self { ptr, rc }
     }
 
-    /// Returns a reference to the `Arena` that owns this item
+    /// Returns a reference to the [`Arena`] that owns this item.
     pub fn arena(&self) -> &Arena<T> {
         &self.rc
     }
 
-    /// Downgrades a strong pointer into a weak pointer
+    /// Downgrades a strong pointer into a weak pointer.
     pub fn weak(&self) -> Weak<T> {
         Weak::new(self.ptr, self.rc.downgrade())
     }
 
-    /// Returns a simple reference to this item
+    /// Returns a simple reference to this item.
     pub fn borrow(&'_ self) -> Ref<'_, T> {
         Ref::new(self.ptr, &self.rc)
     }

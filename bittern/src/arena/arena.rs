@@ -7,17 +7,17 @@ use crate::arena::iter::ArenaIter;
 
 pub(crate) type ArenaWeak<T> = Weak<ArenaInner<T>>;
 
-/// Reference-counted pointer to an arena
+/// Reference-counted pointer to an arena.
 pub struct Arena<T: ?Sized> {
     rc: Rc<ArenaInner<T>>
 }
 impl<T: ?Sized> Arena<T> {
-    /// Creates an empty `Arena` with the default config.
+    /// Creates an empty [`Arena`] with the default config.
     pub fn new() -> Self {
         Self::with_config(ArenaConfig::default())
     }
 
-    /// Creates an empty `Arena` with a custom config.
+    /// Creates an empty [`Arena`] with a custom config.
     pub fn with_config(config: ArenaConfig) -> Self {
         Self { rc: Rc::new(ArenaInner::new(config)) }
     }
@@ -68,7 +68,7 @@ impl<T: ?Sized> Arena<T> {
 
     /// Returns the number of strong pointers to this arena.
     ///
-    /// This includes `Arena` and `Strong` values that reference this allocation.
+    /// This includes [`Arena`] and [`Strong`](crate::Strong) references to this allocation.
     #[inline]
     pub fn strong_count(&self) -> usize {
         Rc::strong_count(&self.rc)
@@ -76,7 +76,7 @@ impl<T: ?Sized> Arena<T> {
 
     /// Returns the number of weak pointers to this arena.
     ///
-    /// This includes `Weak` values that reference this allocation.
+    /// This includes [`Weak`](crate::Weak) references to this allocation.
     #[inline]
     pub fn weak_count(&self) -> usize {
         Rc::weak_count(&self.rc)
@@ -103,7 +103,7 @@ impl<T: ?Sized> Arena<T> {
 
     /// Returns a reference to an item identified by the specified key.
     ///
-    /// The key may be any type where the item implements `Identity<K>`.
+    /// The key may be any type where the item implements [`Identity<K>`].
     pub fn get<K>(&'_ self, key: &K) -> Option<Ref<'_, T>>
     where K: ?Sized, T: Identity<K>
     {
@@ -115,7 +115,7 @@ impl<T: ?Sized> Arena<T> {
 
     /// Returns `true` if the arena contains an item identified by the specified key.
     ///
-    /// The key may be any type where the item implements `Identity<K>`.
+    /// The key may be any type where the item implements [`Identity<K>`].
     pub fn contains<K>(&self, key: &K) -> bool
     where K: ?Sized, T: Identity<K>
     {
@@ -136,18 +136,24 @@ impl<T: ?Sized> Eq for Arena<T> {}
 
 // intern
 impl Arena<str> {
-    /// Interns a value in the arena by copying it to the heap.
+    /// Interns a value in the arena by copying it to the heap and returning a reference.
     ///
     /// If an identical value is found in the arena (see [`Identity`]), the existing value is returned.
-    ///
+    /// Otherwise, `val` is inserted and returned.
+    /// 
+    /// The returned value may not be [`PartialEq::eq`] to `val`, but it will be [`Identity::equivalent`].
     pub fn intern(&'_ self, val: &str) -> Ref<'_, str>{
         Ref::new(self.rc.intern(val), self)
     }
 }
 impl<T> Arena<[T]> where T: Copy, [T]: Identity
 {
-    /// Interns a value in the arena by copying it to the heap.
+    /// Interns a value in the arena by copying it to the heap and returning a reference.
     ///
+    /// If an identical value is found in the arena (see [`Identity`]), the existing value is returned.
+    /// Otherwise, `val` is inserted and returned.
+    ///
+    /// The returned value may not be [`PartialEq::eq`] to `val`, but it will be [`Identity::equivalent`].
     pub fn intern(&'_ self, val: &[T]) -> Ref<'_, [T]> {
         Ref::new(self.rc.intern(val), self)
     }
@@ -156,8 +162,12 @@ impl<T> Arena<[T]> where T: Copy, [T]: Identity
 // intern_owned
 impl<T> Arena<T> where T: Identity
 {
-    /// Interns a value in the arena by moving it to the heap.
+    /// Interns a value in the arena by moving it to the heap and returning a reference.
     ///
+    /// If an identical value is found in the arena (see [`Identity`]), the existing value is returned.
+    /// Otherwise, `val` is inserted and returned.
+    ///
+    /// The returned value may not be [`PartialEq::eq`] to `val`, but it will be [`Identity::equivalent`].
     pub fn intern_owned(&'_ self, val: T) -> Ref<'_, T> {
         Ref::new(self.rc.intern_owned(val), self)
     }
@@ -166,16 +176,24 @@ impl<T> Arena<T> where T: Identity
 // intern_cloned
 impl<T> Arena<T> where T: Clone + Identity
 {
-    /// Interns a value in the arena by cloning it to the heap.
+    /// Interns a value in the arena by cloning it to the heap and returning a reference.
     ///
+    /// If an identical value is found in the arena (see [`Identity`]), the existing value is returned.
+    /// Otherwise, `val` is inserted and returned.
+    ///
+    /// The returned value may not be [`PartialEq::eq`] to `val`, but it will be [`Identity::equivalent`].
     pub fn intern_cloned(&'_ self, val: &T) -> Ref<'_, T> {
         Ref::new(self.rc.intern_cloned(val), self)
     }
 }
 impl<T> Arena<[T]> where T: Clone, [T]: Identity
 {
-    /// Interns a value in the arena by cloning it to the heap.
+    /// Interns a value in the arena by cloning it to the heap and returning a reference.
     ///
+    /// If an identical value is found in the arena (see [`Identity`]), the existing value is returned.
+    /// Otherwise, `val` is inserted and returned.
+    ///
+    /// The returned value may not be [`PartialEq::eq`] to `val`, but it will be [`Identity::equivalent`].
     pub fn intern_cloned(&'_ self, val: &[T]) -> Ref<'_, [T]> {
         Ref::new(self.rc.intern_cloned(val), self)
     }

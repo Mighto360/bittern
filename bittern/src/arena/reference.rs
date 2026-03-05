@@ -6,7 +6,7 @@ use core::ops::Deref;
 use core::ptr::NonNull;
 use crate::any_ref::inherent_ref_methods;
 
-/// Simple reference to a single item in an arena
+/// Simple reference to a single item in an arena.
 pub struct Ref<'a, T: ?Sized> {
     r: &'a T,
     a: &'a Arena<T>,
@@ -16,17 +16,17 @@ impl<'a, T: ?Sized> Ref<'a, T> {
         Self { r: non_null_deref_copy(ptr), a: arena }
     }
 
-    /// Returns a reference to the `Arena` that owns this item
+    /// Returns a reference to the [`Arena`] that owns this item.
     pub fn arena(&self) -> &Arena<T> {
         &self.a
     }
 
-    /// Converts a reference into a strong pointer
+    /// Converts a reference into a strong pointer.
     pub fn strong(&self) -> Strong<T> {
         Strong::new(non_null(self.r), self.a.clone())
     }
 
-    /// Converts a reference into a weak pointer
+    /// Converts a reference into a weak pointer.
     pub fn weak(&self) -> Weak<T> {
         Weak::new(non_null(self.r), self.a.downgrade())
     }

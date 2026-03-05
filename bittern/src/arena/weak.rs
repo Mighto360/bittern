@@ -6,7 +6,7 @@ use crate::arena::strong::Strong;
 use crate::any_ref::inherent_ref_methods;
 use crate::AnyRef;
 
-/// Weakly reference counted pointer to a single item in an arena
+/// Weakly reference counted pointer to a single item in an arena.
 pub struct Weak<T: ?Sized> {
     ptr: NonNull<T>,
     rc: ArenaWeak<T>,
@@ -16,12 +16,12 @@ impl<T: ?Sized> Weak<T> {
         Self { ptr, rc }
     }
 
-    /// Attempts to upgrade to the `Arena` that owns this item
+    /// Attempts to upgrade to the [`Arena`] that owns this item.
     pub fn arena(&self) -> Option<Arena<T>> {
        Arena::upgrade(&self.rc)
     }
 
-    /// Attempts to upgrade a weak pointer into a strong pointer
+    /// Attempts to upgrade a weak pointer into a strong pointer.
     pub fn strong(&self) -> Option<Strong<T>> {
         match self.arena() {
             Some(rc) => Some(Strong::new(self.ptr, rc)),

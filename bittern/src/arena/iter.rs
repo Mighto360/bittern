@@ -1,7 +1,7 @@
 use crate::{Arena, Ref};
 use crate::internal::iter::IndexRefIter;
 
-/// Iterator over all items in an `Arena`, in arbitrary order
+/// Iterator over all items in an [`Arena`], in arbitrary order.
 pub struct ArenaIter<'a, T: ?Sized> {
     inner: IndexRefIter<'a, T>,
     arena: &'a Arena<T>,
