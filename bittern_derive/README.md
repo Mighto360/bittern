@@ -4,7 +4,7 @@
 
 Procedural macros for deriving [bittern] traits.
 
-```rust
+```rust,ignore
 use bittern::Identity;
 
 // Derive Identity for any type that is Hash + Eq
