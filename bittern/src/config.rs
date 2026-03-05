@@ -1,11 +1,14 @@
 /// Config builder for the arena
 pub struct ArenaConfig {
+    /// Whether `Drop::drop` will be called on all items when the arena is dropped.
+    ///
+    /// Defaults to `true`.
     pub drop_items: bool,
 }
 impl ArenaConfig {
-    /// default = true
-    /// If true: items will be individually dropped when the arena is dropped
-    /// If false: items will be deallocated without calling their Drop::drop method
+    /// Whether `Drop::drop` will be called on all items when the arena is dropped.
+    ///
+    /// Defaults to `true`.
     pub fn drop_items(mut self, drop_items: bool) -> Self {
         self.drop_items = drop_items;
         self

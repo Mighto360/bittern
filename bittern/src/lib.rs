@@ -1,10 +1,14 @@
+#![doc = include_str!("../README.md")]
+#![deny(missing_docs)]
 #![no_std]
+
 extern crate alloc;
 
 mod identity;
 mod collection;
 mod internal;
 mod config;
+mod any_ref;
 
 #[cfg(feature = "derive")]
 pub use bittern_derive::*;
@@ -17,6 +21,7 @@ pub use collection::weak::Weak;
 pub use collection::iter::ArenaIter;
 pub use config::ArenaConfig;
 pub use identity::Identity;
+pub use any_ref::AnyRef;
 
 #[cfg(test)]
 mod tests {

@@ -1,11 +1,26 @@
+#![no_std]
 extern crate proc_macro;
 
+use core::fmt::{Display, Formatter};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DataStruct, DeriveInput, Error, Field, Fields, Ident, Index, Member};
 
 const TRAIT_NAME: &'static str = "Identity";
 const KEY_ATTR: &'static str = "identity";
+
+enum MacroError {
+    ExpectedStructOrEnum,
+    MultipleIdentityFields,
+}
+impl Display for MacroError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        match self {
+            MacroError::ExpectedStructOrEnum => write!(f, "#[derive({})] only supports struct and enum", TRAIT_NAME),
+            MacroError::MultipleIdentityFields => write!(f, "Only one field should be #[{}]", KEY_ATTR),
+        }
+    }
+}
 
 #[proc_macro_derive(Identity, attributes(identity))]
 pub fn derive_identity(input: TokenStream) -> TokenStream {
@@ -14,7 +29,7 @@ pub fn derive_identity(input: TokenStream) -> TokenStream {
     match input.data {
         Data::Struct(struct_data) => derive_struct(name, struct_data),
         Data::Enum(_) => derive_enum(name),
-        _ => Error::new_spanned(&name, format!("#[derive({})] only supports struct and enum", TRAIT_NAME))
+        _ => Error::new_spanned(&name, MacroError::ExpectedStructOrEnum)
             .to_compile_error().into()
     }
 }
@@ -25,7 +40,7 @@ fn check_attr(fields: &Fields) -> Result<Option<usize>, Error> {
         let has_key_attr = field.attrs.iter().any(|attr| attr.path().is_ident(KEY_ATTR));
         if has_key_attr {
             if key_index.is_some() {
-                return Err(Error::new_spanned(field, format!("Only one field should be #[{}]", KEY_ATTR)));
+                return Err(Error::new_spanned(field, MacroError::MultipleIdentityFields));
             }
             key_index = Some(i);
         }

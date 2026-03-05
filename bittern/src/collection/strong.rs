@@ -2,8 +2,8 @@ use core::fmt::{Debug, Display, Formatter};
 use core::hash::{Hash, Hasher};
 use core::ops::Deref;
 use core::ptr::NonNull;
-use crate::{Arena, Ref, Weak};
-use crate::collection::any_ref::AnyRef;
+use crate::{AnyRef, Arena, Ref, Weak};
+use crate::any_ref::inherent_ref_methods;
 use crate::internal::ptr::non_null_deref;
 
 /// Reference-counted pointer to a single item in an arena
@@ -15,38 +15,23 @@ impl<T: ?Sized> Strong<T> {
     pub(crate) fn new(ptr: NonNull<T>, rc: Arena<T>) -> Self {
         Self { ptr, rc }
     }
-    
+
+    /// Returns a reference to the `Arena` that owns this item
     pub fn arena(&self) -> &Arena<T> {
         &self.rc
     }
-    
+
+    /// Downgrades a strong pointer into a weak pointer
     pub fn weak(&self) -> Weak<T> {
         Weak::new(self.ptr, self.rc.downgrade())
     }
 
+    /// Returns a simple reference to this item
     pub fn borrow(&'_ self) -> Ref<'_, T> {
         Ref::new(self.ptr, &self.rc)
     }
 
-    #[inline]
-    pub fn is<O: AnyRef<T>>(&self, other: &O) -> bool {
-        core::ptr::eq(self.as_ptr(), other.as_ptr())
-    }
-
-    #[inline]
-    pub fn is_not<O: AnyRef<T>>(&self, other: &O) -> bool {
-        !self.is(other)
-    }
-    
-    #[inline]
-    pub fn arena_strong_count(&self) -> usize {
-        self.rc.strong_count()
-    }
-
-    #[inline]
-    pub fn arena_weak_count(&self) -> usize {
-        self.rc.weak_count()
-    }
+    inherent_ref_methods!(<T>);
 }
 impl<T: ?Sized> AnyRef<T> for Strong<T> {
     fn as_ptr(&self) -> *const T {

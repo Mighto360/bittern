@@ -2,8 +2,9 @@ use core::fmt::{Debug, Formatter};
 use core::hash::{Hash, Hasher};
 use crate::collection::arena::{Arena, ArenaWeak};
 use core::ptr::NonNull;
-use crate::collection::any_ref::AnyRef;
 use crate::collection::strong::Strong;
+use crate::any_ref::inherent_ref_methods;
+use crate::AnyRef;
 
 /// Weakly reference counted pointer to a single item in an arena
 pub struct Weak<T: ?Sized> {
@@ -15,10 +16,12 @@ impl<T: ?Sized> Weak<T> {
         Self { ptr, rc }
     }
 
+    /// Attempts to upgrade to the `Arena` that owns this item
     pub fn arena(&self) -> Option<Arena<T>> {
        Arena::upgrade(&self.rc)
     }
 
+    /// Attempts to upgrade a weak pointer into a strong pointer
     pub fn strong(&self) -> Option<Strong<T>> {
         match self.arena() {
             Some(rc) => Some(Strong::new(self.ptr, rc)),
@@ -26,15 +29,7 @@ impl<T: ?Sized> Weak<T> {
         }
     }
 
-    #[inline]
-    pub fn is<O: AnyRef<T>>(&self, other: &O) -> bool {
-        core::ptr::eq(self.as_ptr(), other.as_ptr())
-    }
-
-    #[inline]
-    pub fn is_not<O: AnyRef<T>>(&self, other: &O) -> bool {
-        !self.is(other)
-    }
+    inherent_ref_methods!(<T>);
 }
 impl<T: ?Sized> AnyRef<T> for Weak<T> {
     fn as_ptr(&self) -> *const T {

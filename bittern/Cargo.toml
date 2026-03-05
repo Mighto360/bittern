@@ -3,6 +3,7 @@ name = "bittern"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.71.1"
+license = "MIT"
 
 [features]
 default = ["runtime-rng", "derive"]
@@ -19,10 +20,12 @@ hashbrown = { version = "0.16.1", default-features = false, features = ["inline-
 [dev-dependencies]
 divan = "0.1.16"
 
+# Benchmarks:
 [[bench]]
 name = "str_interning"
 harness = false
 
+# Examples:
 [[example]]
 name = "str_interning"
 

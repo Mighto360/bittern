@@ -1,17 +1,24 @@
 use core::hash::{BuildHasher, Hash};
 use crate::internal::hash::core_hash;
 
-/// Minimum requirements for indexing items by a key type (or Self).
-/// If more than one Identity impl exists for a type,
-/// they must all produce the same hash for equivalent values.
+/// Minimum requirements for indexing items by a key type (or `Self`).
+///
+/// Represents a notion of "identity", which may differ from structural equality.
+/// `Arena` will intern values to the same instance if `index` returns the same value and `equivalent` is true.
 pub trait Identity<K: ?Sized = Self> {
+    /// Hashable type used to index each unique value
     type Index: ?Sized + Hash;
 
     /// Tests if values represent the same entity
+    ///
+    /// Values should be equivalent if and only if they have the same index.
     fn equivalent(&self, other: &K) -> bool;
     
     /// Provides a hashable value for each key.
-    /// Values should be equivalent if and only if they have the same index
+    ///
+    /// Values should be equivalent if and only if they have the same index.
+    ///
+    /// If more than one `Identity` impl exists for a type, they must all produce the same hash for equivalent values.
     fn index(key: &K) -> &Self::Index;
     
     /// Hashes a key for indexing
