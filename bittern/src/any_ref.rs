@@ -34,7 +34,7 @@ macro_rules! inherent_ref_methods {
         /// Equivalent to [`PartialEq::eq`], but `is` may be preferred for semantic clarity.
         #[inline]
         pub fn is<O: crate::AnyRef<$T>>(&self, other: &O) -> bool {
-            core::ptr::eq(self.as_ptr(), other.as_ptr())
+            crate::AnyRef::is(self, other)
         }
 
         /// Returns `true` if two references point to different items, using a pointer equality check.
@@ -43,7 +43,7 @@ macro_rules! inherent_ref_methods {
         /// Equivalent to [`PartialEq::ne`], but `is_not` may be preferred for semantic clarity.
         #[inline]
         pub fn is_not<O: crate::AnyRef<$T>>(&self, other: &O) -> bool {
-            !self.is(other)
+            crate::AnyRef::is_not(self, other)
         }
     };
 }

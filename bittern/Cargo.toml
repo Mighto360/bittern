@@ -16,7 +16,7 @@ runtime-rng = ["ahash/runtime-rng"]
 compile-time-rng = ["ahash/compile-time-rng"]
 
 [dependencies]
-bittern_derive = { version = "0.1.0", path = "../bittern_derive", optional = true }
+bittern_derive = { version = "0.1.1", path = "../bittern_derive", optional = true }
 ahash = { version = "0.8.12", default-features = false }
 bumpalo = { version = "3.19.1", default-features = false }
 hashbrown = { version = "0.16.1", default-features = false, features = ["inline-more", "raw-entry"] }
