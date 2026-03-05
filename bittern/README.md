@@ -25,7 +25,7 @@ bittern can store values together in a chunk of allocated memory.
 - Slices are interned into a pointer, which greatly improves the performance of equality checks.
 
 [examples/str_interning.rs](https://github.com/mighto360/bittern/blob/main/bittern/examples/str_interning.rs)
-```rust
+```rust,ignore
 // Demonstrates how to intern strings, without wrangling lifetimes or individual String allocations
 
 use bittern::{Arena, Ref};
@@ -58,7 +58,7 @@ This crate is well suited for building graphs and trees with many identical node
 The following example demonstrates a math interpreter that merges equivalent subexpressions.
 
 [examples/parsing.rs](https://github.com/mighto360/bittern/blob/main/bittern/examples/parsing.rs)
-```rust
+```rust,ignore
 // Demonstrates a simple expression interpreter using an arena-allocated syntax tree.
 // The language uses Lisp-like prefix notation with optional parentheses.
 // Feature "derive" must be enabled
@@ -133,7 +133,7 @@ Sometimes data should be deduplicated by a single field, rather than the entire 
 This demonstrates a `User` struct identified by its `id` field.
 
 [examples/primary_key.rs](https://github.com/mighto360/bittern/blob/main/bittern/examples/primary_key.rs)
-```rust
+```rust,ignore
 // Demonstrates an arena of Users, deduplicated by their id field.
 // Feature "derive" must be enabled
 
