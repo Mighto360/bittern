@@ -1,8 +1,8 @@
 use core::fmt::{Debug, Formatter};
 use core::hash::{Hash, Hasher};
-use crate::collection::arena::{Arena, ArenaWeak};
+use crate::arena::arena::{Arena, ArenaWeak};
 use core::ptr::NonNull;
-use crate::collection::strong::Strong;
+use crate::arena::strong::Strong;
 use crate::any_ref::inherent_ref_methods;
 use crate::AnyRef;
 

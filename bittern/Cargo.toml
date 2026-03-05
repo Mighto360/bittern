@@ -10,7 +10,8 @@ repository = "https://github.com/mighto360/bittern"
 keywords = ["arena", "rc", "intern", "interner", "symbol"]
 
 [features]
-default = ["runtime-rng", "derive"]
+default = ["runtime-rng", "derive", "secondary"]
+secondary = []
 derive = ["dep:bittern_derive"]
 runtime-rng = ["ahash/runtime-rng"]
 compile-time-rng = ["ahash/compile-time-rng"]

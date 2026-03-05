@@ -4,24 +4,28 @@
 
 extern crate alloc;
 
-mod identity;
-mod collection;
+mod arena;
 mod internal;
 mod config;
+mod identity;
 mod any_ref;
+#[cfg(feature = "secondary")]
+mod secondary;
 
 #[cfg(feature = "derive")]
 pub use bittern_derive::*;
 
-pub use collection::arena::Arena;
-pub use collection::reference::Ref;
-pub use collection::secondary::{SecondaryMap, SecondarySet};
-pub use collection::strong::Strong;
-pub use collection::weak::Weak;
-pub use collection::iter::ArenaIter;
+pub use arena::arena::Arena;
+pub use arena::reference::Ref;
+pub use arena::strong::Strong;
+pub use arena::weak::Weak;
+pub use arena::iter::ArenaIter;
 pub use config::ArenaConfig;
 pub use identity::Identity;
 pub use any_ref::AnyRef;
+
+#[cfg(feature = "secondary")]
+pub use secondary::{SecondaryMap, SecondarySet};
 
 #[cfg(test)]
 mod tests {

@@ -1,9 +1,9 @@
-use crate::collection::reference::Ref;
+use crate::arena::reference::Ref;
 use crate::identity::Identity;
 use crate::internal::arena::ArenaInner;
 use crate::{ArenaConfig, AnyRef};
 use alloc::rc::{Rc, Weak};
-use crate::collection::iter::ArenaIter;
+use crate::arena::iter::ArenaIter;
 
 pub(crate) type ArenaWeak<T> = Weak<ArenaInner<T>>;
 
