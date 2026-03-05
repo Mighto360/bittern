@@ -1,9 +1,13 @@
 [package]
 name = "bittern"
+description = "A reference-counted arena for interning and deduplicating data"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.71.1"
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/mighto360/bittern"
+keywords = ["arena", "rc", "intern", "interner", "symbol"]
 
 [features]
 default = ["runtime-rng", "derive"]

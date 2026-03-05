@@ -1,4 +1,6 @@
+#![doc = include_str!("../README.md")]
 #![no_std]
+
 extern crate proc_macro;
 
 use core::fmt::{Display, Formatter};
