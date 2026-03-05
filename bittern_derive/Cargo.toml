@@ -1,6 +1,6 @@
 [package]
 name = "bittern_derive"
-description = "Procedural macro for bittern"
+description = "Procedural macros for deriving bittern traits"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.71.1"
