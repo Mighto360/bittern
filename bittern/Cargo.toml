@@ -1,7 +1,7 @@
 [package]
 name = "bittern"
 description = "A reference-counted arena for interning and deduplicating data"
-version = "0.1.1"
+version = "1.0.0"
 edition = "2021"
 rust-version = "1.71.1"
 license = "MIT"
@@ -17,7 +17,7 @@ runtime-rng = ["ahash/runtime-rng"]
 compile-time-rng = ["ahash/compile-time-rng"]
 
 [dependencies]
-bittern_derive = { version = "0.1.1", path = "../bittern_derive", optional = true }
+bittern_derive = { version = "1.0.0", path = "../bittern_derive", optional = true }
 ahash = { version = "0.8.12", default-features = false }
 bumpalo = { version = "3.19.1", default-features = false }
 hashbrown = { version = "0.16.1", default-features = false, features = ["inline-more", "raw-entry"] }
