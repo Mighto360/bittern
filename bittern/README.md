@@ -1,9 +1,13 @@
 # bittern
 
-[![Build Status]][actions]
+[![Build Status]][actions] [![Latest Version]][crates.io] [![Docs Status]][docs.rs]
 
 [Build Status]: https://img.shields.io/github/actions/workflow/status/mighto360/bittern/rust.yml?branch=main
 [actions]: https://github.com/mighto360/bittern/actions
+[Latest Version]: https://img.shields.io/crates/v/bittern.svg
+[crates.io]: https://crates.io/crates/bittern
+[Docs Status]: https://docs.rs/bittern/badge.svg
+[docs.rs]: https://docs.rs/bittern
 
 A reference-counted arena for interning and deduplicating data.
 
