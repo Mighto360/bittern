@@ -1,5 +1,10 @@
 # bittern
 
+[![Build Status]][actions]
+
+[Build Status]: https://img.shields.io/github/actions/workflow/status/mighto360/bittern/rust.yml?branch=main
+[actions]: https://github.com/mighto360/bittern/actions
+
 A reference-counted arena for interning and deduplicating data.
 
 Bittern provides `Arena<T>`, a collection type with roughly three duties:
@@ -17,6 +22,10 @@ This crate fully supports `#![no_std]` environments. It depends only on `core` a
 
 ## Examples
 
+[examples/str_interning.rs]: https://github.com/mighto360/bittern/blob/main/bittern/examples/str_interning.rs
+[examples/parsing.rs]: https://github.com/mighto360/bittern/blob/main/bittern/examples/parsing.rs
+[examples/primary_key.rs]: https://github.com/mighto360/bittern/blob/main/bittern/examples/primary_key.rs
+
 ### 1) String interning / Symbol table
 
 When interning dynamically sized slices or strings,
@@ -24,7 +33,7 @@ bittern can store values together in a chunk of allocated memory.
 - Fewer allocations and better locality compared to many individual `String` or `Vec`.
 - Slices are interned into a pointer, which greatly improves the performance of equality checks.
 
-[examples/str_interning.rs](https://github.com/mighto360/bittern/blob/main/bittern/examples/str_interning.rs)
+[examples/str_interning.rs]
 ```rust,ignore
 // Demonstrates how to intern strings, without wrangling lifetimes or individual String allocations
 
@@ -57,7 +66,7 @@ fn main() {
 This crate is well suited for building graphs and trees with many identical nodes.  
 The following example demonstrates a math interpreter that merges equivalent subexpressions.
 
-[examples/parsing.rs](https://github.com/mighto360/bittern/blob/main/bittern/examples/parsing.rs)
+[examples/parsing.rs]
 ```rust,ignore
 // Demonstrates a simple expression interpreter using an arena-allocated syntax tree.
 // The language uses Lisp-like prefix notation with optional parentheses.
@@ -132,7 +141,7 @@ impl Eval {
 Sometimes data should be deduplicated by a single field, rather than the entire struct.  
 This demonstrates a `User` struct identified by its `id` field.
 
-[examples/primary_key.rs](https://github.com/mighto360/bittern/blob/main/bittern/examples/primary_key.rs)
+[examples/primary_key.rs]
 ```rust,ignore
 // Demonstrates an arena of Users, deduplicated by their id field.
 // Feature "derive" must be enabled
